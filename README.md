@@ -35,3 +35,23 @@ Pass the `-message` flag to print a custom message:
 ```sh
 ./fs-scratch-0 -message "your message"
 ```
+
+## Testing
+
+Run the test suite:
+
+```sh
+go test ./...
+```
+
+Run the vet checks:
+
+```sh
+go vet ./...
+```
+
+Check formatting (expected to print nothing):
+
+```sh
+gofmt -l .
+```
