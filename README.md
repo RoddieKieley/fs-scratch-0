@@ -36,6 +36,14 @@ Pass the `-message` flag to print a custom message:
 ./fs-scratch-0 -message "your message"
 ```
 
+Pass the `--colour` flag to print the message in a colour. The named
+colours `red`, `blue` and `green` are supported, as are six-digit HTML
+colour hashes such as `#FF0000` (case-insensitive):
+
+```sh
+./fs-scratch-0 --colour "#FF0000"
+```
+
 ## Testing
 
 Run the test suite:
