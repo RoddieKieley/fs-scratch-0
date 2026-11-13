@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -127,6 +128,38 @@ func TestRunColourHexWithCustomMessage(t *testing.T) {
 	}
 	if got := buf.String(); got != "\033[38;2;0;255;0mhi\033[0m\n" {
 		t.Fatalf("expected %q, got %q", "\033[38;2;0;255;0mhi\033[0m\n", got)
+	}
+}
+
+func TestRunHelp(t *testing.T) {
+	var buf bytes.Buffer
+	args := []string{"--help"}
+	if err := run(args, &buf); err != nil {
+		t.Fatalf("run() returned error: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{
+		"--message",
+		"message to write to stdout",
+		"--colour",
+		"colour to print the message in",
+		`--message "your message"`,
+		`--colour "#FF0000"`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("help output does not contain %q:\n%s", want, out)
+		}
+	}
+}
+
+func TestRunHelpTakesPrecedence(t *testing.T) {
+	var buf bytes.Buffer
+	args := []string{"--help", "--message", "x"}
+	if err := run(args, &buf); err != nil {
+		t.Fatalf("run() returned error: %v", err)
+	}
+	if got := buf.String(); got != helpText {
+		t.Fatalf("expected help text only, got %q", got)
 	}
 }
 

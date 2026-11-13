@@ -16,12 +16,29 @@ func main() {
 	}
 }
 
+const helpText = `Usage:
+  fs-scratch-0 [flags]
+
+Flags:
+  --message string   message to write to stdout (default "Hello World!")
+  --colour string    colour to print the message in (red, blue, green or a #RRGGBB HTML colour hash)
+  --help             show this help
+
+Examples:
+  fs-scratch-0 --message "your message"
+  fs-scratch-0 --colour "#FF0000"
+`
+
 func run(args []string, w io.Writer) error {
 	fs := flag.NewFlagSet("fs-scratch-0", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	message := fs.String("message", "Hello World!", "message to write to stdout")
 	colour := fs.String("colour", "", "colour to print the message in (red, blue, green or a #RRGGBB HTML colour hash)")
 	if err := fs.Parse(args); err != nil {
+		if err != flag.ErrHelp {
+			return err
+		}
+		_, err = fmt.Fprint(w, helpText)
 		return err
 	}
 	var prefix, suffix string
