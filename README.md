@@ -44,6 +44,15 @@ colour hashes such as `#FF0000` (case-insensitive):
 ./fs-scratch-0 --colour "#FF0000"
 ```
 
+Pass the `--json` flag to provide the message and colour as a single JSON
+object. The object may contain `message` and `colour` keys; missing keys
+fall back to the defaults (`Hello World!` and no colour). It cannot be
+combined with `--message` or `--colour`:
+
+```sh
+./fs-scratch-0 --json '{"message": "your message", "colour": "#FF0000"}'
+```
+
 ## Testing
 
 Run the test suite:

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -22,11 +23,13 @@ const helpText = `Usage:
 Flags:
   --message string   message to write to stdout (default "Hello World!")
   --colour string    colour to print the message in (red, blue, green or a #RRGGBB HTML colour hash)
+  --json string      JSON object with optional "message" and "colour" keys
   --help             show this help
 
 Examples:
   fs-scratch-0 --message "your message"
   fs-scratch-0 --colour "#FF0000"
+  fs-scratch-0 --json '{"message": "My Message", "colour": "#00FF00"}'
 `
 
 func run(args []string, w io.Writer) error {
@@ -34,12 +37,42 @@ func run(args []string, w io.Writer) error {
 	fs.SetOutput(io.Discard)
 	message := fs.String("message", "Hello World!", "message to write to stdout")
 	colour := fs.String("colour", "", "colour to print the message in (red, blue, green or a #RRGGBB HTML colour hash)")
+	jsonVal := fs.String("json", "", "JSON object with optional \"message\" and \"colour\" keys")
 	if err := fs.Parse(args); err != nil {
 		if err != flag.ErrHelp {
 			return err
 		}
 		_, err = fmt.Fprint(w, helpText)
 		return err
+	}
+	if *jsonVal != "" {
+		setFlags := map[string]bool{}
+		fs.Visit(func(f *flag.Flag) { setFlags[f.Name] = true })
+		if setFlags["message"] || setFlags["colour"] {
+			return errors.New("--json cannot be combined with --message or --colour.")
+		}
+		var fields map[string]json.RawMessage
+		if err := json.Unmarshal([]byte(*jsonVal), &fields); err != nil {
+			return fmt.Errorf("invalid --json value: %w", err)
+		}
+		if fields == nil {
+			return errors.New("--json value must be a JSON object.")
+		}
+		for key := range fields {
+			if key != "message" && key != "colour" {
+				return fmt.Errorf("unknown key %q in --json value", key)
+			}
+		}
+		if raw, ok := fields["message"]; ok {
+			if err := json.Unmarshal(raw, message); err != nil {
+				return fmt.Errorf("invalid --json value: %w", err)
+			}
+		}
+		if raw, ok := fields["colour"]; ok {
+			if err := json.Unmarshal(raw, colour); err != nil {
+				return fmt.Errorf("invalid --json value: %w", err)
+			}
+		}
 	}
 	var prefix, suffix string
 	switch *colour {
