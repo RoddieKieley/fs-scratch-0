@@ -24,12 +24,14 @@ Flags:
   --message string   message to write to stdout (default "Hello World!")
   --colour string    colour to print the message in (red, blue, green or a #RRGGBB HTML colour hash)
   --json string      JSON object with optional "message" and "colour" keys
+  --reverse          reverse the message before printing it to stdout
   --help             show this help
 
 Examples:
   fs-scratch-0 --message "your message"
   fs-scratch-0 --colour "#FF0000"
   fs-scratch-0 --json '{"message": "My Message", "colour": "#00FF00"}'
+  fs-scratch-0 --reverse
 `
 
 func run(args []string, w io.Writer) error {
@@ -38,6 +40,7 @@ func run(args []string, w io.Writer) error {
 	message := fs.String("message", "Hello World!", "message to write to stdout")
 	colour := fs.String("colour", "", "colour to print the message in (red, blue, green or a #RRGGBB HTML colour hash)")
 	jsonVal := fs.String("json", "", "JSON object with optional \"message\" and \"colour\" keys")
+	reverse := fs.Bool("reverse", false, "reverse the message before printing it to stdout")
 	if err := fs.Parse(args); err != nil {
 		if err != flag.ErrHelp {
 			return err
@@ -73,6 +76,13 @@ func run(args []string, w io.Writer) error {
 				return fmt.Errorf("invalid --json value: %w", err)
 			}
 		}
+	}
+	if *reverse {
+		r := []rune(*message)
+		for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
+			r[i], r[j] = r[j], r[i]
+		}
+		*message = string(r)
 	}
 	var prefix, suffix string
 	switch *colour {

@@ -53,6 +53,14 @@ combined with `--message` or `--colour`:
 ./fs-scratch-0 --json '{"message": "your message", "colour": "#FF0000"}'
 ```
 
+Pass the `--reverse` flag to print the message reversed. It applies to the
+default message, `--message` and `--json` alike, and can be combined with
+`--colour`:
+
+```sh
+./fs-scratch-0 --reverse
+```
+
 ## Testing
 
 Run the test suite:

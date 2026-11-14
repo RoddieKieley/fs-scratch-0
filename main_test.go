@@ -238,6 +238,61 @@ func TestRunJSONWithColourFlag(t *testing.T) {
 	}
 }
 
+func TestRunReverseDefaultMessage(t *testing.T) {
+	var buf bytes.Buffer
+	args := []string{"--reverse"}
+	if err := run(args, &buf); err != nil {
+		t.Fatalf("run() returned error: %v", err)
+	}
+	if got := buf.String(); got != "!dlroW olleH\n" {
+		t.Fatalf("expected %q, got %q", "!dlroW olleH\n", got)
+	}
+}
+
+func TestRunReverseCustomMessage(t *testing.T) {
+	var buf bytes.Buffer
+	args := []string{"--message", "abc", "--reverse"}
+	if err := run(args, &buf); err != nil {
+		t.Fatalf("run() returned error: %v", err)
+	}
+	if got := buf.String(); got != "cba\n" {
+		t.Fatalf("expected %q, got %q", "cba\n", got)
+	}
+}
+
+func TestRunReverseJSON(t *testing.T) {
+	var buf bytes.Buffer
+	args := []string{"--json", `{"message":"abc"}`, "--reverse"}
+	if err := run(args, &buf); err != nil {
+		t.Fatalf("run() returned error: %v", err)
+	}
+	if got := buf.String(); got != "cba\n" {
+		t.Fatalf("expected %q, got %q", "cba\n", got)
+	}
+}
+
+func TestRunReverseUnicode(t *testing.T) {
+	var buf bytes.Buffer
+	args := []string{"--message", "héllo", "--reverse"}
+	if err := run(args, &buf); err != nil {
+		t.Fatalf("run() returned error: %v", err)
+	}
+	if got := buf.String(); got != "olléh\n" {
+		t.Fatalf("expected %q, got %q", "olléh\n", got)
+	}
+}
+
+func TestRunReverseWithColour(t *testing.T) {
+	var buf bytes.Buffer
+	args := []string{"--reverse", "--colour", "blue"}
+	if err := run(args, &buf); err != nil {
+		t.Fatalf("run() returned error: %v", err)
+	}
+	if got := buf.String(); got != "\033[34m!dlroW olleH\033[0m\n" {
+		t.Fatalf("expected %q, got %q", "\033[34m!dlroW olleH\033[0m\n", got)
+	}
+}
+
 func TestRunHelp(t *testing.T) {
 	var buf bytes.Buffer
 	args := []string{"--help"}
@@ -251,6 +306,8 @@ func TestRunHelp(t *testing.T) {
 		"--colour",
 		"colour to print the message in",
 		"--json",
+		"--reverse",
+		"reverse the message before printing it",
 		`--message "your message"`,
 		`--colour "#FF0000"`,
 		`--json '{"message": "My Message", "colour": "#00FF00"}'`,
